@@ -1,0 +1,36 @@
+# burn an out-of-box SSD into steady state performance.
+#
+# first sequentially write the drive, then completely overwrite the device
+# again randomly at 4K.
+#
+# the former gives us a good idea of the ideal write performance; the latter
+# we would expect to start out at approximately the same rate as the sequential
+# fill, but at some point hit a write cliff and hit the steady state.
+#
+# note that this is a DESTRUCTIVE test, and whatever data you have on there
+# will be gone!
+
+[global]
+filename=/dev/nvme0n1
+ioengine=libaio
+
+direct=1
+buffered=0
+invalidate=1
+
+thread
+group_reporting
+
+[sequential-fill]
+readwrite=write
+blocksize=1M
+iodepth=16
+
+[random-fill]
+stonewall
+readwrite=randwrite
+blocksize=4K
+iodepth=32
+randrepeat=0
+norandommap
+numjobs=4

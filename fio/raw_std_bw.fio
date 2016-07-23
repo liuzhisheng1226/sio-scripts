@@ -1,0 +1,25 @@
+# Sequential bandwith: 128KB of transfer size with queue depth 128.
+
+[global]
+filename=/dev/nvme0n1
+ioengine=libaio
+
+direct=1
+buffered=0
+invalidate=1
+
+blocksize=128K
+iodepth=128
+
+time_based
+ramp_time=30
+runtime=180
+
+group_reporting
+
+[sequential-read]
+readwrite=read
+
+[sequential-write]
+stonewall
+readwrite=write
