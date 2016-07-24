@@ -14,6 +14,9 @@ iodepth=1
 randrepeat=0
 norandommap
 
+numa_cpu_nodes=1
+numa_mem_policy=bind:1
+
 time_based
 ramp_time=30
 runtime=180
