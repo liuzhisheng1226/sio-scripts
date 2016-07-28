@@ -41,7 +41,7 @@ fi
 # create the REPO file
 if [ -d /etc/yum.repos.d ]; then
 	[ ! -f /etc/yum.repos.d/CentOS-ISO.repo ] || rm -f /etc/yum.repos.d/CentOS-ISO.repo
-	echo -ne "[c6-iso]\nname=CentOS-\$releasever - ISO\nbaseurl=file:///$MNTPOINT/\ngpgcheck=1\nenabled=0\ngpgkey=file:///$MNTPOINT/RPM-GPG-KEY-CentOS-6" >/etc/yum.repos.d/CentOS-ISO.repo
+	echo -ne "[c6-iso]\nname=CentOS-\$releasever - ISO\nbaseurl=file://$MNTPOINT/\nenabled=0\ngpgcheck=1\ngpgkey=file://$MNTPOINT/RPM-GPG-KEY-CentOS-6" >/etc/yum.repos.d/CentOS-ISO.repo
 else
 	umount $MNTPOINT
 	echo "ERROR: /etc/yum.repos.d not found! are you sure this is RHEL/CENTOS?" >&2
