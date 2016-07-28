@@ -43,28 +43,32 @@ RHEL/CentOS下，可通过SCL安装较新版本的软件包：
     sudo yum install devtoolset-4-gcc devtoolset-4-gcc-c++
     scl enable devtoolset-4 bash
 
-RHEL/CentOS下，如若使用ISO镜像作为`yum`安装源：
+RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜像：
 
     sudo mount -t iso9660 -o loop,ro /path/to/image.iso /mount/point
 
-禁用`/etc/yum.repos.d`下的安装源(`enabled=0`)，然后新建`.repo`文件：
+并于`/etc/yum.repos.d`下创建配置文件，比如`CentOS-ISO.repo`：
 
-    [iso-base]
-    name=CentOS-$releasever - ISO Base
-    baseurl=file:///path/to/mount/point
-    gpgkey=file:///path/to/mount/point/RPM-GPG-KEY
+    [c6-iso]
+    name=CentOS-$releasever - ISO
+    baseurl=file:///mount/point/
+    enabled=0
     gpgcheck=1
-    enabled=1
+    gpgkey=file:///mount/point/RPM-GPG-KEY
 
-然后清空`yum`缓存即可：
+清空`yum`缓存：
 
     sudo yum clean all
 
-若使用NFS共享目录，则在服务端：
+然后即可通过ISO镜像源安装软件包：
 
-    sudo yum install nfs-utils rpcbind (CentOS-6)
+    yum --disablerepo=\* --enablerepo=c6-iso ...
 
-设置`/etc/exports`，比如：
+若使用NFS共享目录，CentOS-6下首先于服务端安装NFS与RPC：
+
+    sudo yum install nfs-utils rpcbind
+
+并设置`/etc/exports`，比如：
 
     /dir/to/be/nfs/mounted IPADDR/PREFIX(insecure,rw,async,no_root_squash)
 
@@ -81,6 +85,12 @@ RHEL/CentOS下，如若使用ISO镜像作为`yum`安装源：
 建议关闭SELinux，编辑`/etc/selinux/config`：
 
     SELINUX=disabled
+
+并重启。
+
+若要运行时临时关闭SELinux：
+
+    sudo setenforce 0
 
 建议关闭防火墙：
 
