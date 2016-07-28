@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# mount the ISO image and set up the YUM-REPO.
+
+set -e
+
+# argument: your ISO file
+if [ -z $1 ]; then
+	echo "Argument(s) required!" >&2
+	echo "Usage: $(basename $0) /path/to/your/centos/iso/file" >&2
+	exit 1
+fi
+ISOFILE=$1
+
+# check the ISO file
+if [ ! -e $ISOFILE ]; then
+	echo "$ISOFILE does NOT exist!" >&2
+	exit 1
+fi
+
+if ! file $ISOFILE | grep -i -e "iso 9660 cd-rom" -e "x86 boot sector" >/dev/null 2>&1; then
+	echo "WARNING: FILE command doesn't recognize $ISOFILE as an ISO image!" >&2
+fi
+
+# mount the ISO image
+MNTPOINT=/mnt/centos
+
+if [ ! -d $MNTPOINT ]; then
+	mkdir -p $MNTPOINT
+fi
+
+if mount -l | grep -i $MNTPOINT >/dev/null 2>&1; then
+	umount $MNTPOINT
+fi
+
+mount -t iso9660 -o loop,ro $ISOFILE $MNTPOINT
+if ! mount -l | grep -i $MNTPOINT >/dev/null 2>&1; then
+	echo "ERROR: failed to mount $ISOFILE to $MNTPOINT!" >&2
+	exit 1
+fi
+
+# create the REPO file
+if [ -d /etc/yum.repos.d ]; then
+	[ ! -f /etc/yum.repos.d/CentOS-ISO.repo ] || rm -f /etc/yum.repos.d/CentOS-ISO.repo
+	echo -ne "[c6-iso]\nname=CentOS-\$releasever - ISO\nbaseurl=file:///$MNTPOINT/\ngpgcheck=1\nenabled=0\ngpgkey=file:///$MNTPOINT/RPM-GPG-KEY-CentOS-6" >/etc/yum.repos.d/CentOS-ISO.repo
+else
+	umount $MNTPOINT
+	echo "ERROR: /etc/yum.repos.d not found! are you sure this is RHEL/CENTOS?" >&2
+	exit 1
+fi
+
+# final notification
+echo    "==================================================================="
+echo    "ISO image mounted and YUM-REPO configured!"
+echo -e "Remember to \`\033[1myum clean all\033[0m\` first!"
+echo -e "Use \`\033[1myum --disablerepo=\\* --enablerepo=c6-iso\033[0m\` to install packages." 
+echo    "==================================================================="
