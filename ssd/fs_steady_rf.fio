@@ -1,0 +1,21 @@
+# Randomly fill the filesystem.
+
+[global]
+directory=/mnt/nvme0n1p1
+filename=fio_file
+ioengine=libaio
+
+direct=1
+buffered=0
+invalidate=1
+
+group_reporting
+
+[random-fill]
+readwrite=randwrite
+blocksize=4K
+iodepth=32
+randrepeat=0
+norandommap
+numjobs=4
+thread

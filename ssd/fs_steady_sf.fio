@@ -1,0 +1,19 @@
+# Sequentially fill the filesystem.
+
+[global]
+directory=/mnt/nvme0n1p1
+filename=fio_file
+size=700G
+ioengine=libaio
+
+direct=1
+buffered=0
+invalidate=1
+
+group_reporting
+
+[sequential-fill]
+readwrite=write
+blocksize=1M
+iodepth=16
+thread
