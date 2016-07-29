@@ -245,6 +245,11 @@ SDK安装完成后，可通过编译并运行`deviceQuery`、`bandwidthTest`验�
     lsmod | grep -i ib
     lsmod | grep -i rdma
 
+或者：
+
+    sudo service rdma status
+    sudo service openibd status
+
 确保底层硬件驱动(比如`mlx4_core`、`mlx4_ib`)与中间层核心组件(比如`ib_core`、`ib_uverbs`)已加载。
 
 建议提高非root用户可锁定(Pinned)内存的大小，编辑配置文件`/etc/security/limits.conf`或`/etc/security/limits.d/rdma.conf`，加入如下两行：
