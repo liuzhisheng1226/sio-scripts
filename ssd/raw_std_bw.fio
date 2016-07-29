@@ -20,9 +20,9 @@ runtime=180
 
 group_reporting
 
-[sequential-read]
+[sr128k-bw]
 readwrite=read
 
-[sequential-write]
+[sw128k-bw]
 stonewall
 readwrite=write

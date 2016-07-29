@@ -4,11 +4,11 @@
 
 # set up fio executable and the working directory
 FIO=fio
-[[ -z $1 ]] || FIO=$1
+[ -z $1 ] || FIO=$1
 JOBDIR=.
-[[ -z $2 ]] || JOBDIR=$2
-RESDIR=$JOBDIR/res/kernel
-[[ -d $RESDIR ]] || mkdir -p $RESDIR
+[ -z $2 ] || JOBDIR=${2%/}
+RESDIR=$JOBDIR/results/kernel
+[ -d $RESDIR ] || mkdir -p $RESDIR
 
 # sequentially fill the drive several times
 for each in {0..3}
@@ -27,8 +27,8 @@ done
 # randomly write the drive so the performance enters the steady state
 for once in 0
 do
-#	numactl --cpunodebind=1 --membind=1 $FIO $JOBDIR/raw_std_steady.fio --output=$RESDIR/steady.txt
-	$FIO $JOBDIR/raw_std_steady.fio --output=$RESDIR/steady.txt
+#	numactl --cpunodebind=1 --membind=1 $FIO $JOBDIR/raw_steady.fio --output=$RESDIR/steady.txt
+	$FIO $JOBDIR/raw_steady.fio --output=$RESDIR/steady.txt
 	sleep 4
 done
 # then benchmark the IOPS and latency performance

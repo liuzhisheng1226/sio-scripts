@@ -4,13 +4,13 @@
 
 # set up perf and fio executables and the working directory
 PERF=perf
-[[ -z $1 ]] || PERF=$1
+[ -z $1 ] || PERF=$1
 FIO=fio
-[[ -z $2 ]] || FIO=$2
+[ -z $2 ] || FIO=$2
 JOBDIR=.
-[[ -z $3 ]] || JOBDIR=$3
-RESDIR=$JOBDIR/res/user
-[[ -d $RESDIR ]] || mkdir -p $RESDIR
+[ -z $3 ] || JOBDIR=${3%/}
+RESDIR=$JOBDIR/results/spdk
+[ -d $RESDIR ] || mkdir -p $RESDIR
 
 # sequentially fill the drive several times
 for each in {0..3}
@@ -30,8 +30,8 @@ done
 # randomly write the drive so the performance enters the steady state
 for once in 1
 do
-#	numactl --cpunodebind=1 --membind=1 $FIO $JOBDIR/raw_std_steady.fio
-	$FIO $JOBDIR/raw_std_steady.fio
+#	numactl --cpunodebind=1 --membind=1 $FIO $JOBDIR/raw_steady.fio
+	$FIO $JOBDIR/raw_steady.fio
 	sleep 4
 done
 # then benchmark the IOPS and latency performance: 4KB/8KB random RW, 1T/QD128 or 4T/QD32
