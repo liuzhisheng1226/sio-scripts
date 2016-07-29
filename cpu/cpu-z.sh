@@ -10,6 +10,7 @@
 # * kernel version
 #   display a WARNING if kernel-devel or kernel-headers not installed
 # * gcc version
+# * CUDA driver version
 
 set -e
 
@@ -54,7 +55,7 @@ if command -v lspci >/dev/null 2>&1; then
 		echo $line | cut -c 9-
 	done < <(lspci | grep -i "1c5f" || echo "@ @ @ @ NONE Memblaze SSD(s) detected!")
 else
-	echo >&2 "ERROR: lspci required! please yum install pciutils!"
+	echo >&2 "ERROR: lspci required! Please yum install pciutils!"
 fi
 
 # SouthBridge Drive(s)
@@ -66,7 +67,7 @@ if command -v lsblk >/dev/null 2>&1; then
 		#echo $line | cut -d ' ' -f 3- | sed -r 's/ ([^ ]*)$/, \1/'
 	done < <(lsblk -o TYPE,NAME,MODEL,SIZE | grep -i "disk" | grep -i "sd" || echo -e "@ @ NONE HDD(s) detected!")
 else
-	echo >&2 "ERROR: lsblk required! please yum install util-linux-ng!"
+	echo >&2 "ERROR: lsblk required! Please yum install util-linux-ng!"
 fi
 
 # Operating System
@@ -82,7 +83,7 @@ elif [ -f /etc/lsb-release ]; then
 	echo $(cat /etc/lsb-release | grep -i description | cut -d '"' -f 2)
 else
 	echo -e -n '\t'
-	echo "unrecognized distro ..."
+	echo "Unrecognized Linux Distro ..."
 fi
 
 # Kernel
@@ -92,13 +93,13 @@ echo $(uname -sr)
 if command -v rpm >/dev/null 2>&1; then
 	rpm -q kernel-devel-$(uname -r)      >/dev/null 2>&1 || \
 	rpm -q kernel-lt-devel-$(uname -r)   >/dev/null 2>&1 || \
-	{ echo -e -n '\t'; echo >&2 "WARNING: failed to find package kernel-devel for current kernel!";   }
+	{ echo -e -n '\t'; echo >&2 "WARNING: failed to find package kernel-devel for current kernel ...";   }
 	rpm -q kernel-headers-$(uname -r)    >/dev/null 2>&1 || \
 	rpm -q kernel-lt-headers-$(uname -r) >/dev/null 2>&1 || \
-	{ echo -e -n '\t'; echo >&2 "WARNING: failed to find package kernel-headers for current kernel!"; }
+	{ echo -e -n '\t'; echo >&2 "WARNING: failed to find package kernel-headers for current kernel ..."; }
 elif command -v dpkg >/dev/null 2>&1; then
 	dpkg -l linux-headers-$(uname -r)    >/dev/null 2>&1 || \
-	{ echo -e -n '\t'; echo >&2 "WARNING: failed to find package linux-headers for current kernel!"; }
+	{ echo -e -n '\t'; echo >&2 "WARNING: failed to find package linux-headers for current kernel ...";  }
 fi
 
 # GCC
@@ -107,5 +108,12 @@ if command -v gcc >/dev/null 2>&1; then
 	echo -e -n '\t'
 	echo $(gcc --version | head -n 1 | cut -c 4-)
 else
-	echo "gcc not installed! please yum install gcc gcc-c++!"
+	echo "GCC not installed! Please yum install gcc gcc-c++!"
+fi
+
+# CUDA driver
+if [ -e /proc/driver/nvidia/version ]; then
+	echo -e "\033[1mCUDA Driver\033[0m"
+	echo -e -n '\t'
+	echo $(head -n 1 /proc/driver/nvidia/version | tr -s ' ' | cut -d ' ' -f 3-8)
 fi
