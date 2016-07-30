@@ -132,11 +132,13 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
 
     sh cuda_7.5.18_linux.run --extract=/absolute/path/to/extract/
 
-解压后得到`cuda-linux64-rel-7.5.18-19867135.run`(工具包)、`cuda-samples-linux-7.5.18-19867135.run`(SDK)以及`NVIDIA-Linux-x86_64-352.39.run`(驱动)三个文件，可通过`sh`分别执行安装或使用`--extract-only`、`-x`或`--tar mxvf`选项对其进一步解压。
+解压后得到`cuda-linux64-rel-7.5.18-19867135.run`(工具包)、`cuda-samples-linux-7.5.18-19867135.run`(示例)以及`NVIDIA-Linux-x86_64-352.39.run`(驱动)三个文件，可通过`sh`分别执行安装或使用`--extract-only`、`-x`或`--tar mxvf`选项对其进一步解压。
 
-安装驱动需要退出图形环境：
+安装驱动前应先退出图形环境，进入TTY后(比如按下`Ctrl+Alt+F2`)：
 
     sudo /sbin/init 3
+
+然后执行驱动`run`文件，根据提示逐步完成内核驱动的安装。
 
 安装完成后查看驱动版本：
 
@@ -156,6 +158,8 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
 
 ### 3.2 安装CUDA工具包
 
+CUDA工具包的安装比较简单，执行工具包`run`文件后根据提示逐步执行即可完成安装。
+
 工具包需对环境进行一定的配置：
 
 * `PATH`包含`/path/to/cuda/install/bin`；
@@ -170,9 +174,11 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
     Built on Thu_Apr__5_00:24:31_PDT_2012
     Cuda compilation tools, release 4.2, V0.2.1221
 
-### 3.3 安装CUDA SDK
+### 3.3 安装CUDA示例
 
-SDK安装完成后，可通过编译并运行`deviceQuery`、`bandwidthTest`验证CUDA环境是否配置妥当，比如：
+CUDA示例的安装比较简单，执行示例`run`文件后根据提示逐步执行即可完成安装。
+
+示例安装完成后，可通过编译并运行`deviceQuery`、`bandwidthTest`等以验证CUDA环境是否配置妥当，比如：
 
     $ ./deviceQuery 
     CUDA Device Query (Runtime API) version (CUDART static linking)
