@@ -5,7 +5,7 @@ set -e
 
 # argument: your ISO file
 if [ -z $1 ]; then
-	echo "Argument(s) required!" >&2
+	echo "Argument(s) Required!" >&2
 	echo "Usage: $(basename $0) /path/to/your/centos/iso/file" >&2
 	exit 1
 fi
