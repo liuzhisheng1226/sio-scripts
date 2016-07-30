@@ -15,7 +15,7 @@ if [[ $1 != "enforcing" && $1 != "permissive" && $1 != "disabled" ]]; then
 	exit 1
 fi
 
-[ -f /etc/selinux/config ] || { echo "ERROR: /etc/selinux/config not found!"; exit 1; }
+[ -f /etc/selinux/config ] || { echo "ERROR: /etc/selinux/config not found!" >&2; exit 1; }
 
 if   [ $1 == "enforcing"  ]; then
 	sed -i -- 's/^SELINUX=.\+/SELINUX=enforcing/g'  /etc/selinux/config
