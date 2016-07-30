@@ -344,7 +344,7 @@ Linux 3.9及以上内核可通过`intel_pstate`控制处理器主频，系统接
 
 * 客户端：`ucmatos -s $SERVER_IP`。
 
-## 6 MVAPICH2部署
+## 5 MVAPICH2部署
 
 MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-state.edu/downloads/)下载，解压后执行如下步骤进行编译安装：
 
@@ -356,7 +356,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
     /path/to/mvapich2/bin/mpirun_rsh --hostfile hosts -np 2 /path/to/mvapich2-2.1/examples/cpi
 
-## 7 Ruby部署
+## 6 Ruby部署
 
 通过包管理器安装即可，比如RHEL/CentOS下：
 
@@ -364,7 +364,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 为保证后续的dscuda与vGPU能够正常编译，应保证`ruby`安装或链接至`/usr/bin/ruby`。
 
-## 8 dscuda编译与使用
+## 7 dscuda编译与使用
 
 以DS-CUDA 2.5为例介绍其编译与使用。
 
@@ -396,9 +396,9 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 `sample`目录下提供了典型的客户端示例，进入相应目录下`make`即可编译。
 
-## 9 vGPU使用与编译
+## 8 vGPU使用与编译
 
-### 9.1 vGPU使用
+### 8.1 vGPU使用
 
 版本`20160419`的VGPU发布版包含了可执行二进制码，可直接运行、测试。
 
@@ -430,7 +430,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 配置完成后可执行`sample`目录下的示例客户端进行验证与测试；对于多进程共享GPU，可通过MPI等框架等实现，VGPU提供的示例即基于MPI，可使用`mpirun`等工具启动多进程进行GPU共享测试。
 
-### 9.2 vGPU编译
+### 8.2 vGPU编译
 
 需设置`CUDAPATH`与`CUDASDKPATH`两个环境变量，另外由于示例使用了MPI，还应配置MPI相关环境或路径。
 
@@ -443,3 +443,23 @@ vGPU解压于`src`目录下执行`make`即可，生成以下文件：
 * `libcudart.so.3`：vGPU客户端运行时。
 
 示例代码的编译进入`sample`下的相应目录执行`make`即可完成。
+
+## 9 Memblaze设备管理
+
+可以使用官方管理工具`nvmemgr`对Memblaze设备进行管理；`nvmemgr`从[官方网站](http://www.memblaze.com/cn/zcyxz/zlxz.html)下载后解压编译即可。
+
+进行性能测试前，应将设备置于最高电源模式(25W)下：
+
+    sudo nvmemgr setfeature --ctrl nvme0 --featureid 198 --value 0
+
+为获得出厂性能，可尝试对设备执行安全擦除(SE)：
+
+    sudo nvmemgr formatnvm --ns nvme0n1 --lbaformat 0 --secureerase 1
+
+可使用`parted`对设备进行分区，比如：
+
+    sudo parted /dev/nvme0n1 mklabel msdos
+    sudo parted --align optimal /dev/nvme0n1 mkpart primary 0% 100%
+    sudo mkfs.ext4 /dev/nvme0n1p1
+
+然后即可通过`mount`命令进行挂载并访问。
