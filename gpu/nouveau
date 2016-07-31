@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Put the nouveau in the blacklist.
+
+set -e
+
+# check the argument(s)
+if [ -z $1 ]; then
+	echo "Argument(s) Required!" >&2
+	echo "Usage: $(basename $0) [0 (put into blacklist) | 1 (remove from blacklist)]"
+	exit 1
+fi
+if [[ $1 != "0" && $1 != "1" ]]; then
+	echo "Invalid Argument(s): $1" >&2
+	echo "Usage: $(basename $0) [0 (put into blacklist) | 1 (remove from blacklist)]"
+	exit 1
+fi
+
+# check nouveau kernel module
+if lsmod | grep -i nouveau >/dev/null 2>&1; then
+	echo "Nouveau loaded!"
+fi
+
+# blacklist or not
+if [ $1 == "0" ]; then
+	# remove old nouveau configurations (to avoid conflicts)
+	[ ! -f /etc/modprobe.d/blacklist.conf ] || sed -i -- '/nouveau/Id' /etc/modprobe.d/blacklist.conf
+	# block nouveau
+	echo -ne "\n# community Nouveau driver\nblacklist nouveau\noptions nouveau modeset=0" >> /etc/modprobe.d/blacklist.conf
+	echo "Nouveau added to the blacklist!"
+else
+	# remove nouveau from blacklist
+	[ ! -f /etc/modprobe.d/blacklist.conf ] || sed -i -- '/nouveau/Id' /etc/modprobe.d/blacklist.conf
+	echo "Nouveau removed from the blacklist!"
+fi
+
+# remind user to run dracut
+echo -e "Please run \033[1mdracut -f\033[0m or \033[1mupdate-initramfs -u\033[0m and reboot the system!"
