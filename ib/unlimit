@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Set the memlock to unlimited for all users.
+
+set -e
+
+# find the line number of `soft memlock` and remove that line
+SOFTLN=$(cat /etc/security/limits.conf | tr -s ' ' | grep -in "soft memlock" | cut -d ':' -f 1)
+[ -z $SOFTLN ] || sed -ie -- "${SOFTLN}d" /etc/security/limits.conf
+
+# find the line number of `hard memlock` and remove that line
+HARDLN=$(cat /etc/security/limits.conf | tr -s ' ' | grep -in "hard memlock" | cut -d ':' -f 1)
+[ -z $HARDLN ] || sed -ie -- "${HARDLN}d" /etc/security/limits.conf
+
+# unlimit the memlock for all users
+echo -ne "* soft memlock unlimited\n* hard memlock unlimited" >> /etc/security/limits.conf
