@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Set up CUDA ld_library_path. 
+
+set -e
+
+# argument: your CUDA installation path
+if [ -z $1 ]; then
+	echo "Argument(s) Required!" >&2
+	echo "Usage: $(basename $0) /absolute/path/to/your/cuda/installation" >&2
+	exit 1
+fi
+
+# verify the input is a directory
+if [ ! -d $1 ]; then
+	echo "Invalid Argument(s): $1 does not exist or is not a directory!" >&2
+	echo "Usage: $(basename $0) /absolute/path/to/your/cuda/installation" >&2
+	exit 1
+fi
+
+# verify the input is a absolute path
+if [ ${1:0:1} != "/" ]; then
+	echo "Invalid Argument(s): $1 is not an absolute path!" >&2
+	echo "Usage: $(basename $0) /absolute/path/to/your/cuda/installation" >&2
+	exit 1
+fi
+
+CUDA_PATH=${1%/}
+
+# check a bit about the CUDA directory
+if [ ! -h $CUDA_PATH/lib64/libcudart.so ]; then
+	echo "WARNING: $CUDA_PATH does not seem to be a CUDA installation directory ..." >&2
+fi
+
+# remove old CUDA ldconfig to avoid conflicts
+find /etc/ld.so.conf.d | grep -i cuda | xargs rm -f
+
+# set up CUDA dynamic libraries
+echo -ne "$CUDA_PATH/lib64\n$CUDA_PATH/lib" > /etc/ld.so.conf.d/cuda-x86_64.conf
+ldconfig
+
+echo "Done!"
