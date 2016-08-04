@@ -1,0 +1,4 @@
+#/home/azq/build     10.18.129.0/24(ro,sync)
+/home/azq/build     10.18.129.0/24(insecure,rw,async,no_root_squash)
+/home/azq/dev       10.18.129.0/24(insecure,rw,async,no_root_squash)
+/home/azq/opt       10.18.129.0/24(insecure,rw,async,no_root_squash)
