@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Print instructions on extracting CUDA installation runfiles.
+
+echo "To extract a CUDA runfile:"
+echo "* For CUDA runfile, use \`--extract=/path/to/extract\` or \`--tar mxvf -C /path/to/extract\` option."
+echo "* For driver runfile, use \`--extract-only\` or \`-x\` option."
+echo "* For toolkit runfile, use \`--tar mxvf -C /path/to/extract\` option."
+echo "* For samples runfile, use \`--tar mxvf -C /path/to/extract\` option."
