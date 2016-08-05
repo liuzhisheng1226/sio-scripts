@@ -1,0 +1,6 @@
+[c6-iso]
+name=CentOS-$releasever - ISO
+baseurl=file:///mnt/centos/
+enabled=0
+gpgcheck=1
+gpgkey=file:///mnt/centos/RPM-GPG-KEY-CentOS-6
