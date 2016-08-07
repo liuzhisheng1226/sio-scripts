@@ -1,0 +1,2 @@
+snode175:/home/azq/dev  /home/azq/dev        nfs        defaults        0 0
+nodev                   /mnt/huge            hugetlbfs  defaults        0 0
