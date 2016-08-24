@@ -1,7 +1,8 @@
 # Random latency: 4KB of transfer size and with queue depth 1.
 
 [global]
-filename=/dev/nvme0n1
+#filename=/dev/nvme0n1
+filename=/dev/memdiska
 ioengine=libaio
 
 direct=1

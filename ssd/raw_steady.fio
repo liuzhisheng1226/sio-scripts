@@ -11,7 +11,8 @@
 # will be gone!
 
 [global]
-filename=/dev/nvme0n1
+#filename=/dev/nvme0n1
+filename=/dev/memdiska
 ioengine=libaio
 
 direct=1

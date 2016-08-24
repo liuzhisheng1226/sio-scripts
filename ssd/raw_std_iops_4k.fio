@@ -1,7 +1,8 @@
 # Random 4KB IOPS: 4 workers and each with queue depth 32.
 
 [global]
-filename=/dev/nvme0n1
+#filename=/dev/nvme0n1
+filename=/dev/memdiska
 ioengine=libaio
 
 direct=1

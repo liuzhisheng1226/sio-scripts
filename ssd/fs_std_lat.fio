@@ -1,7 +1,8 @@
 # Random latency: 4KB of transfer size and with queue depth 1.
 
 [global]
-directory=/mnt/nvme0n1p1
+#directory=/mnt/nvme0n1p1
+directory=/mnt/memdiska
 filename=fio_file
 ioengine=libaio
 
@@ -20,7 +21,7 @@ numa_mem_policy=bind:1
 
 time_based
 ramp_time=30
-runtime=256
+runtime=180
 
 group_reporting
 

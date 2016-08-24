@@ -1,7 +1,8 @@
 # Sequential bandwith: 128KB of transfer size with queue depth 128.
 
 [global]
-filename=/dev/nvme0n1
+#filename=/dev/nvme0n1
+filename=/dev/memdiska
 ioengine=libaio
 
 direct=1

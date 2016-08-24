@@ -1,7 +1,8 @@
 # Sequentially fill the filesystem.
 
 [global]
-directory=/mnt/nvme0n1p1
+#directory=/mnt/nvme0n1p1
+directory=/mnt/memdiska
 filename=fio_file
 size=700G
 ioengine=libaio
