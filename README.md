@@ -2,15 +2,15 @@
 
 [TOC]
 
-# SuperIO部署指南
+# VIO部署指南
 
 ## 1 简介
 
-SuperIO系统软件主要包括：
+VIO系统软件主要包括：
 
 * vGPU中间件：提供了通过网络(支持TCP/IP与InfiniBand)对远程/非本地NVIDIA GPU的无缝访问。
 
-* u2Cache缓存系统：内存+SSD缓存系统，支持Memcache文本接口，并通过RDMA与SPDK技术极大的降低了访问延迟。
+* u2Cache缓存系统：内存+SSD缓存系统，支持Memcache文本接口，并利用RDMA与SPDK技术极大的降低了访问延迟。
 
 ## 2 准备
 
@@ -22,15 +22,13 @@ SuperIO系统软件主要包括：
 
 可通过`sudo update-pciids`来更细系统的PCI硬件数据库。
 
-安装合适的内核开发库与头文件：
+部署VIO之前需安装合适的内核开发库与头文件：
 
     sudo yum install kernel-devel-$(uname -r) kernel-headers-$(uname -r) (RHEL/CentOS)
-    sudo apt-get install linux-headers-$(uname -r) (Ubuntu)
 
-安装编译工具链：
+并安装编译工具链：
 
     sudo yum groupinstall "Development Tools" (RHEL/CentOS)
-    sudo apt-get install build-essential (Ubuntu)
 
 RHEL/CentOS下，可通过SCL安装较新版本的软件包：
 
@@ -62,15 +60,19 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
 
 然后即可通过ISO镜像源安装软件包：
 
-    yum --disablerepo=\* --enablerepo=c6-iso ...
+    yum --disablerepo=\* --enablerepo=c6-iso install ...
 
 若使用NFS共享目录，CentOS-6下首先于服务端安装NFS与RPC：
 
     sudo yum install nfs-utils rpcbind
 
-并设置`/etc/exports`，比如：
+并配置`/etc/exports`，格式如下：
 
-    /dir/to/be/nfs/mounted IPADDR/PREFIX(insecure,rw,async,no_root_squash)
+    /dir/to/be/nfs/mounted IPADDR/PREFIX(OPTIONS)
+
+比如：
+
+    /root/super-io *(insecure,rw,async,no_root_squash)
 
 然后启动NFS与RPC服务：
 
@@ -79,16 +81,13 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
 
 之后即可于客户端挂载NFS目录了：
 
-    sudo showmount -e NFS_SERVER
-    sudo mount -t nfs NFS_SERVER:/dir/to/be/nfs/mounted /local/mount/point
+    sudo mount -t nfs $NFS_SERVER:/dir/to/be/nfs/mounted /local/mount/point
 
-建议关闭SELinux，编辑`/etc/selinux/config`：
+建议关闭SELinux，配置`/etc/selinux/config`：
 
     SELINUX=disabled
 
-并重启。
-
-若要运行时临时关闭SELinux：
+并重启系统；若要运行时临时关闭SELinux：
 
     sudo setenforce 0
 
@@ -113,7 +112,6 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
 然后重新生成Initramfs：
 
     sudo dracut -f (RHEL/CentOS)
-    sudo update-initramfs -u (Ubuntu)
 
 如若已安装过GPU驱动，建议首先卸载旧版：
 
@@ -132,7 +130,7 @@ RHEL/CentOS下，若要使用ISO镜像作为`yum`安装源，应首先挂载镜�
 
     sh cuda_7.5.18_linux.run --extract=/absolute/path/to/extract/
 
-解压后得到`cuda-linux64-rel-7.5.18-19867135.run`(工具包)、`cuda-samples-linux-7.5.18-19867135.run`(示例)以及`NVIDIA-Linux-x86_64-352.39.run`(驱动)三个文件，可通过`sh`分别执行安装或使用`--extract-only`、`-x`或`--tar mxvf`选项对其进一步解压。
+解压后得到`cuda-linux64-rel-7.5.18-19867135.run`(工具包)、`cuda-samples-linux-7.5.18-19867135.run`(示例)以及`NVIDIA-Linux-x86_64-352.39.run`(驱动)三个文件，可通过`sh`分别执行安装或使用`--extract-only`、`-x`或`--tar mxvf`等选项对其进一步解压。
 
 安装驱动前应先退出图形环境，进入TTY后(比如按下`Ctrl+Alt+F2`)：
 
@@ -195,13 +193,10 @@ CUDA示例的安装比较简单，执行示例`run`文件后根据提示逐步�
     ... ...
     deviceQuery, CUDA Driver = CUDART, CUDA Driver Version = 7.5, CUDA Runtime Version = 4.2, NumDevs = 1, Device0 = Tesla K40m
 
-如要编译GL相关代码，需安装GLUT库：
+如要编译X与GL相关代码，需安装：
 
     sudo yum install freeglut-devel (RHEL/CentOS)
     sudo apt-get install freeglut3-dev (Ubuntu)
-
-如要编译X相关代码，需安装：
-
     sudo yum install libXi-devel libXmu-devel
 
 ## 4 OFED部署
@@ -281,8 +276,8 @@ IPoIB即基于InfiniBand模拟IP层，对iWARP和RoCE/IBoE而言，由于其本�
 
 确保`ib_ipoib`模块已加载；若需手动加载/卸载：
 
-    sudo modprobe ib_ipoib (加载)
-    sudo modprobe -r ib_ipoib (卸载)
+    sudo modprobe ib_ipoib
+    sudo modprobe -r ib_ipoib
 
 当IPoIB内核模块顺利加载后，IB设备的每一个端口都对应到一个网络接口；IPoIB接口名称一般以`ib`开头，比如：
 
@@ -330,11 +325,17 @@ IPoIB即基于InfiniBand模拟IP层，对iWARP和RoCE/IBoE而言，由于其本�
 
 * 客户端：`sudo ibping -c 1024 -f -C mlx4_0 -P 1 -L 1`。
 
-可通过`ib_***`测试InfiniBand网络的性能，比如测试RDMA写延迟，
+可通过`ib_***`测试InfiniBand网络的性能，比如测试RDMA写延迟：
 
 * 服务端：`sudo ib_write_lat -a`；
 
-* 客户端：`sudo ib_write_lat -a [SERVER-HOST]`。
+* 客户端：`sudo ib_write_lat -a $SERVER-HOST`。
+
+再比如测试InfiniBand通信带宽：
+
+* 服务端：`sudo ib_send_lat -a`；
+
+* 客户端：`sudo ib_send_lat -a $SERVER-HOST`。
 
 如若测试程序提示CPU主频冲突，可执行如下脚本将强制CPU工作在标准主频：
 
@@ -344,7 +345,7 @@ Linux 3.9及以上内核可通过`intel_pstate`控制处理器主频，系统接
 
     /sys/devices/system/cpu/intel_pstate/
 
-可通过`rping`、`udaddy`、`ucmatose`、`rdma_server`/`rdma_client`等验证RDMA_CM的可用性，比如
+可通过`rping`、`udaddy`、`ucmatose`、`rdma_server`/`rdma_client`等验证RDMA_CM的可用性，比如：
 
 * 服务端：`ucmatos`；
 
@@ -374,7 +375,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 以DS-CUDA 2.5为例介绍其编译与使用。
 
-编译时需要的环境变量
+编译时需要的环境变量：
 
 * `CUDAPATH`：CUDA工具包目录；
 
@@ -382,7 +383,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 进入`src`目录执行`make`即可编译生成DS-CUDA服务端。
 
-启动服务端需要的环境变量
+启动服务端需要的环境变量：
 
 * `DSCUDA_SVRPATH`：比如`/var/tmp`；
 
@@ -390,7 +391,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 运行`src/dscudad`即可启动DS-CUDA值守进程。
 
-运行客户端需要的环境变量
+运行客户端需要的环境变量：
 
 * `DSCUDA_SVRPATH`：指向编译生成的`svr`映像，比如`userapp_ibv.svr`所在的目录；
 
@@ -406,15 +407,13 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 ### 8.1 vGPU使用
 
-版本`20160419`的VGPU发布版包含了可执行二进制码，可直接运行、测试。
-
-服务端需设定如下变量：
+运行vGPU之前需进行环境变量的配置。服务端需设定如下变量：
 
 * `DSCUDA_PATH`：该版本VGPU基于DS-CUDA 1.2.7，因而该路径应指向`1.2.7`版本的DS-CUDA所在目录；
 
-* `VGPU_REMOTECALL`：设为`ibv`；
+* `VGPU_REMOTECALL`：设为`ibv`，采用高性能InfiniBand网络；
 
-* `LD_LIBRARY_PATH`：包含CUDA运行时库；由于该版本的VGPU基于CUDA 5.0，因而应包含`5.0`版本的CUDA运行时路径。
+* `LD_LIBRARY_PATH`：包含CUDA运行时库；本版本的VGPU仅支持CUDA 4.2。
 
 配置完成后执行`src/VGPUSvr`即可启用VGPU服务端。若要提供对多GPU设备的远程访问，则应启动多个VGPU服务端实例：
 
@@ -422,7 +421,7 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
     VGPUSvr -s 1 -d 1
     ... ...
 
-`-s`设定服务端iD，`-d`设定设备iD。
+其中，`-s`设定服务端iD，`-d`设定设备iD。
 
 客户端需设定如下变量：
 
@@ -434,13 +433,11 @@ MVAPICH2源码包可从[俄亥俄州立大学官网](http://mvapich.cse.ohio-sta
 
 * `LD_LIBRARY_PATH`：包含VGPU库路径、CUDA运行时库路径以及MPI运行时库路径。
 
-配置完成后可执行`sample`目录下的示例客户端进行验证与测试；对于多进程共享GPU，可通过MPI等框架等实现，VGPU提供的示例即基于MPI，可使用`mpirun`等工具启动多进程进行GPU共享测试。
-
 ### 8.2 vGPU编译
 
-需设置`CUDAPATH`与`CUDASDKPATH`两个环境变量，另外由于示例使用了MPI，还应配置MPI相关环境或路径。
+编译前需设置`CUDAPATH`与`CUDASDKPATH`两个环境变量。
 
-vGPU解压于`src`目录下执行`make`即可，生成以下文件：
+于`src`目录下执行`make`即可，生成以下文件：
 
 * `VGPUSvr`：vGPU服务端，
 
@@ -448,19 +445,53 @@ vGPU解压于`src`目录下执行`make`即可，生成以下文件：
 
 * `libcudart.so.3`：vGPU客户端运行时。
 
-示例代码的编译进入`sample`下的相应目录执行`make`即可完成。
+### 8.3 vGPU示例编译
+
+vGPU示例的编译比较简单，配置完上述环境变量后执行`make`即可。目前提供如下示例：
+
+* `vecadd`：简单的向量加实现，未采用CUDA工具函数；另采用MPI实现多进程，亦可采用其他机制。
+
+* `bandwidth`：简单的带宽测试，未采用CUDA工具函数；VGPU客户端目前尚未支持`cudaMallocHost()`等的实现。
+
+* `transpose`：矩阵转置，基于CUDA SDK 2.x，仅添加了MPI多进程部分的代码。
+
+* `BlackScholes`：BS期权定价模型，基于CUDA SDK 2.x，仅添加了MPI多进程部分的代码。
 
 ## 9 Memblaze设备管理
 
-可以使用官方管理工具`nvmemgr`对Memblaze设备进行管理；`nvmemgr`从[官方网站](http://www.memblaze.com/cn/zcyxz/zlxz.html)下载后解压编译即可。
+### 9.1 PBlaze3管理
 
-进行性能测试前，应将设备置于最高电源模式(25W)下：
+设备代码`0530`即是PBlaze3设备；PBlaze3采用忆恒创源私有协议接口，驱动及工具可从[官方网站](http://www.memblaze.com/cn/zcyxz/zlxz.html)下载安装。
 
-    sudo nvmemgr setfeature --ctrl nvme0 --featureid 198 --value 0
+驱动的编译与安装比较简单，解压源码包后执行`make`与`make install`即可。安装会把驱动文件`memcon.ko`与`memdisk.ko`拷贝到目录`/lib/modules/$(uname -r)`下，并配置`/etc/sysconfig/modules/memdisk.modules`以确保系统启动时自动加载驱动，最后将工具程序拷贝至`/usr/bin`目录下。
+
+可使用`memmonitor`查看设备名称与序列号、软硬件版本、寿命状态、写放大等信息。
+
+若要恢复出厂性能，可尝试对设备执行安全擦除，比如：
+
+    sudo memtach -d /dev/memcona
+    sudo memctrl -i 1145088 /dev/memcona
+    sudo memtach -a /dev/memcona
+
+首条与末条命令分别卸载、挂载设备，第二条命令参数`-i`指定安全擦除操作，`1145088`即重新分配的可用空间大小，该数值针对1.2TB容量的设备。
+
+PBlaze3支持`High`与`Extreme`两种性能模式，为获得最佳性能，可将设备切换为`Extreme`模式：
+
+    sudo memtach -d /dev/memcona
+    sudo memctrl -s Extreme /dev/memcona
+    sudo memtach -a /dev/memcona
+
+### 9.2 PBlaze4管理
+
+设备代码`0540`即是PBlaze4设备；PBlaze4基于标准NVMe接口，因而采用Linux内核`nvme`即可。对于低版本的内核驱动以及管理工具`nvmemgr`，同样可从官网下载安装。
 
 为获得出厂性能，可尝试对设备执行安全擦除(SE)：
 
     sudo nvmemgr formatnvm --ns nvme0n1 --lbaformat 0 --secureerase 1
+
+进行性能测试前，应将设备置于最高电源模式(25W)下：
+
+    sudo nvmemgr setfeature --ctrl nvme0 --featureid 198 --value 0
 
 可使用`parted`对设备进行分区，比如：
 
