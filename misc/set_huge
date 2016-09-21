@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Fairly simple scripts to set up hugetlbfs mount.
+
+set -e
+
+# Make hugttlbfs mount point and mount.
+if ! mount | grep -q hugetlbfs; then
+	[ -d /mnt/huge ] || mkdir -p /mnt/huge
+	mount -t hugetlbfs nodev /mnt/huge
+fi
+
+# Automatically mount the hugetlbfs when reboot.
+if ! grep -q hugetlbfs /etc/fstab; then
+	echo "nodev                   /mnt/huge          hugetlbfs    defaults        0 0" >> /etc/fstab
+fi
