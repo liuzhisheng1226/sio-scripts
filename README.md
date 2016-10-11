@@ -26,7 +26,24 @@ VIO系统软件主要包括：
 
     sudo yum install kernel-devel-$(uname -r) kernel-headers-$(uname -r) (RHEL/CentOS)
 
-并安装编译工具链：
+若要安装更新版本的内核，可使用[elrepo](http://elrepo.org/)提供的源：
+
+    sudo rpm -Uvh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
+    sudo yum install yum-plugin-fastestmirror
+
+然后即可通过`yum`安装：
+
+    sudo yum --disablerepo=\* --enablerepo=elrepo install kernel-lt
+    sudo yum --disablerepo=\* --enablerepo=elrepo install kernel-lt-devel
+    sudo yum --disablerepo=\* --enablerepo=elrepo install kernel-lt-headers
+
+或
+
+    sudo yum --disablerepo=\* --enablerepo=elrepo install kernel-ml
+    sudo yum --disablerepo=\* --enablerepo=elrepo install kernel-ml-devel
+    sudo yum --disablerepo=\* --enablerepo=elrepo install kernel-ml-headers
+
+安装编译工具链：
 
     sudo yum groupinstall "Development Tools" (RHEL/CentOS)
 
@@ -195,15 +212,14 @@ CUDA示例的安装比较简单，执行示例`run`文件后根据提示逐步�
 
 如要编译X与GL相关代码，需安装：
 
-    sudo yum install freeglut-devel (RHEL/CentOS)
+    sudo yum install freeglut-devel libXi-devel libXmu-devel (RHEL/CentOS)
     sudo apt-get install freeglut3-dev (Ubuntu)
-    sudo yum install libXi-devel libXmu-devel
 
 ## 4 OFED部署
 
 ### 4.1 安装InBox OFED
 
-通过官方软件源安装OFED软件包是一种比较简便的安装方法，比如RHEL/CentOS下：
+通过OS发行版官方软件源安装OFED软件包是一种比较简便的安装方法，比如RHEL/CentOS下：
 
     sudo yum groupinstall "InfiniBand Support"
 
@@ -258,7 +274,7 @@ CUDA示例的安装比较简单，执行示例`run`文件后根据提示逐步�
     * soft memlock unlimited
     * hard memlock unlimited
 
-### 4.2 安装社区版OFED或MLNX OFED
+### 4.2 安装Community OFED或Mellanox OFED
 
 也可从[OpenFabrics网站](https://www.openfabrics.org/downloads/OFED/)下载社区版OFED安装包解压后安装，或通过[Mellanox官网](http://www.mellanox.com/page/products_dyn?product_family=26&mtag=linux_sw_drivers)下载安装包。
 
@@ -461,13 +477,13 @@ vGPU示例的编译比较简单，配置完上述环境变量后执行`make`即�
 
 ### 9.1 PBlaze3管理
 
-设备代码`0530`即是PBlaze3设备；PBlaze3采用忆恒创源私有协议接口，驱动及工具可从[官方网站](http://www.memblaze.com/cn/zcyxz/zlxz.html)下载安装。
+设备代码`0530`即是PBlaze3设备；PBlaze3采用忆恒创源私有协议接口，相应驱动及管理工具可从[官方网站](http://www.memblaze.com/cn/zcyxz/zlxz.html)下载安装。
 
 驱动的编译与安装比较简单，解压源码包后执行`make`与`make install`即可。安装会把驱动文件`memcon.ko`与`memdisk.ko`拷贝到目录`/lib/modules/$(uname -r)`下，并配置`/etc/sysconfig/modules/memdisk.modules`以确保系统启动时自动加载驱动，最后将工具程序拷贝至`/usr/bin`目录下。
 
 可使用`memmonitor`查看设备名称与序列号、软硬件版本、寿命状态、写放大等信息。
 
-若要恢复出厂性能，可尝试对设备执行安全擦除，比如：
+若要恢复出厂性能，可尝试对设备执行安全擦除(Secure Erase)，比如：
 
     sudo memtach -d /dev/memcona
     sudo memctrl -i 1145088 /dev/memcona
@@ -483,9 +499,9 @@ PBlaze3支持`High`与`Extreme`两种性能模式，为获得最佳性能，可�
 
 ### 9.2 PBlaze4管理
 
-设备代码`0540`即是PBlaze4设备；PBlaze4基于标准NVMe接口，因而采用Linux内核`nvme`即可。对于低版本的内核驱动以及管理工具`nvmemgr`，同样可从官网下载安装。
+设备代码`0540`即是PBlaze4设备；PBlaze4基于标准NVMe接口，因而采用Linux内核`nvme`即可。对于低版本内核的驱动以及管理工具`nvmemgr`，同样可从官网下载安装。
 
-为获得出厂性能，可尝试对设备执行安全擦除(SE)：
+为获得出厂性能，可尝试对设备执行安全擦除：
 
     sudo nvmemgr formatnvm --ns nvme0n1 --lbaformat 0 --secureerase 1
 
@@ -493,7 +509,7 @@ PBlaze3支持`High`与`Extreme`两种性能模式，为获得最佳性能，可�
 
     sudo nvmemgr setfeature --ctrl nvme0 --featureid 198 --value 0
 
-可使用`parted`对设备进行分区，比如：
+若要创建分区及文件系统，可使用`parted`，比如：
 
     sudo parted /dev/nvme0n1 mklabel msdos
     sudo parted --align optimal /dev/nvme0n1 mkpart primary 0% 100%
