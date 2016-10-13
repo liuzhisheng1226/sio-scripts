@@ -4,7 +4,7 @@
 %define LKAver 4.4.24
 
 # Define the buildid, if required.
-%define buildid azq
+%define buildid .azq
 
 # The following build options are enabled by default.
 # Use either --without <option> on your rpmbuild command line
@@ -83,7 +83,7 @@
 %endif
 
 # Set pkg_release.
-%define pkg_release %{?buildid}%{?dist}
+%define pkg_release 1%{?buildid}%{?dist}
 
 #
 # Three sets of minimum package version requirements in the form of Conflicts.
